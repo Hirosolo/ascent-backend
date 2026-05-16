@@ -55,8 +55,8 @@ export const ProgressRepository = {
       .eq('status', 'COMPLETED');
 
     // Calculate longest continuous streak within the current period
-    const completedWorkouts = workouts?.filter(w => w.status === 'COMPLETED') || [];
-    const uniqueDates = Array.from(new Set(completedWorkouts.map(w => w.scheduled_date))).sort();
+    const periodCompletedWorkouts = workouts?.filter(w => w.status === 'COMPLETED') || [];
+    const uniqueDates = Array.from(new Set(periodCompletedWorkouts.map(w => w.scheduled_date))).sort();
 
     let longestStreak = 0;
     let currentStreak = 0;
