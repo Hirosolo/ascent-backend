@@ -19,6 +19,15 @@ export const verifyEmailSchema = z.object({
   message: 'Provide verification code or token',
 });
 
+export const updateProfileSchema = z.object({
+  username: z.string().min(1, 'Full name is required').optional(),
+  phone_number: z.string().min(10, 'Phone number must be at least 10 digits').optional(),
+  email: z.string().email('Invalid email address').optional(),
+}).refine((data) => data.username || data.phone_number || data.email, {
+  message: 'Provide at least one field to update',
+});
+
 export type SignupInput = z.infer<typeof signupSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

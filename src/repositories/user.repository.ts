@@ -117,4 +117,24 @@ export const UserRepository = {
     if (error) throw new Error(error.message);
     return data?.length ?? 0;
   },
+
+  async updateProfile(userId: number, updates: { username?: string; phone_number?: string; email?: string }): Promise<User> {
+    // Check if email is being changed and if it's already in use
+    if (updates.email) {
+      const existingUser = await UserRepository.findByEmail(updates.email);
+      if (existingUser && existingUser.user_id !== userId) {
+        throw new Error('Email already in use');
+      }
+    }
+
+    const { data, error } = await supabase
+      .from('users')
+      .update(updates)
+      .eq('user_id', userId)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+  },
 };
