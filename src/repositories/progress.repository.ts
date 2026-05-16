@@ -37,6 +37,14 @@ export const ProgressRepository = {
 
     if (workoutError) throw new Error(workoutError.message);
 
+    const { data: completedWorkouts, error: completedWorkoutError } = await supabase
+      .from('workout_sessions')
+      .select('session_id')
+      .eq('user_id', userId)
+      .eq('status', 'COMPLETED');
+
+    if (completedWorkoutError) throw new Error(completedWorkoutError.message);
+
     // Get workouts from previous period for comparison
     const { data: prevWorkouts } = await supabase
       .from('workout_sessions')
@@ -223,6 +231,7 @@ export const ProgressRepository = {
 
     return {
       total_workouts: workouts?.filter((w: any) => w.status === 'COMPLETED').length || 0,
+      total_completed_workouts: completedWorkouts?.length || 0,
       total_volume: Math.round(totalVolume),
       gr_score: Math.round(totalGrScore),
       gr_avg: workouts?.filter((w: any) => w.status === 'COMPLETED').length > 0 
