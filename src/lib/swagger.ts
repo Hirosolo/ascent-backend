@@ -37,20 +37,32 @@ const options = {
 // Try to load pre-generated spec for production, otherwise generate on the fly
 let swaggerSpec: any;
 
+const removeAiPaths = (spec: any) => {
+  if (!spec || !spec.paths) return spec;
+  const filtered: Record<string, any> = {};
+  for (const p of Object.keys(spec.paths)) {
+    if (p.startsWith('/api/ai')) continue;
+    filtered[p] = spec.paths[p];
+  }
+  spec.paths = filtered;
+  return spec;
+};
+
 const preGeneratedPath = path.join(process.cwd(), 'public', 'swagger.json');
 if (process.env.NODE_ENV === 'production' && fs.existsSync(preGeneratedPath)) {
-  // Production: Use pre-generated spec
-  swaggerSpec = JSON.parse(fs.readFileSync(preGeneratedPath, 'utf-8'));
+  // Production: Use pre-generated spec (but strip AI paths just in case)
+  const raw = JSON.parse(fs.readFileSync(preGeneratedPath, 'utf-8'));
+  swaggerSpec = removeAiPaths(raw);
 } else {
-  // Development: Generate from JSDoc comments
-  swaggerSpec = swaggerJSDoc(options);
+  // Development: Generate from JSDoc comments and strip AI paths
+  swaggerSpec = removeAiPaths(swaggerJSDoc(options));
 }
 
 export { swaggerSpec };
 
 // For build-time generation
 export const generateSwaggerSpec = () => {
-  const spec = swaggerJSDoc(options);
+  const spec = removeAiPaths(swaggerJSDoc(options));
   const outputPath = path.join(process.cwd(), 'public', 'swagger.json');
   
   // Ensure public directory exists
